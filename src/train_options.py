@@ -19,16 +19,16 @@ class TrainOptions():
         self.initialized = False
 
     def initialize(self, parser):
-        parser.add_argument('--gpus', type=str, help='gpu_id')
+        parser.add_argument('--gpus', type=str, help='gpu_id',default='0')
         parser.add_argument('--dataset', type=str, default='shanghaiA', help='dataset')
 
 
-        parser.add_argument('--epochs', type=int, default=900)
+        parser.add_argument('--epochs', type=int, default=300)
         parser.add_argument('--lr', type=float, default=0.00001)
 
-        parser.add_argument('--visual', dest='use_tensorboard', action='store_true')
-        parser.add_argument('--no-visual', dest='use_tensorboard', action='store_false')
-        parser.set_defaults(use_tensorboard=True)
+        parser.add_argument('--visual', dest='use_tensorboard', action='store_true',default=True)
+        # parser.add_argument('--no-visual', dest='use_tensorboard', action='store_false')
+        # parser.set_defaults(use_tensorboard=True)
 
 
         parser.add_argument('--save', dest='save_model_para', action='store_true')
@@ -42,7 +42,7 @@ class TrainOptions():
         parser.add_argument('--disp_interval', type=int, default=50)
         parser.add_argument('--save_interval', type=int, default=500)
 
-        parser.add_argument('--batch_size', type=int, default=1)
+        parser.add_argument('--batch_size', type=int, default=12)
 
 
         parser.add_argument('--pretrain', type=str)
@@ -54,9 +54,9 @@ class TrainOptions():
         parser.add_argument('--patches_per_sample', type=int, default=5)
 
 
-        parser.add_argument('--loss', type=str, default="MSE")
+        parser.add_argument('--loss', type=str, default="NORMMSSSIM")
         parser.add_argument('--loss_scale', type=float, default=1.0)
-        parser.add_argument('--model_name', type=str)
+        parser.add_argument('--model_name', type=str,default='CRFVGG_prune')
 
         self.initialized = True
         return parser
@@ -99,19 +99,19 @@ class TrainOptions():
 
         model = opt.model_name
         dataset_name = opt.dataset #dataset name - used for saving model file
-        exp = 'v7-{}-{}-{}/'.format(dataset_name, model, datetime.now().strftime('exp-%m-%d_%H-%M'))
-        expr_dir = './saved_models/{}/'.format(exp) #model files are saved here
+        exp = 'v7-{}-{}-{}'.format(dataset_name, model, datetime.now().strftime('exp-%m-%d_%H-%M'))
+        expr_dir = 'saved_models/{}/'.format(exp) #model files are saved here
 
         opt.crop_size = map(int, opt.crop_size.split('x'))
 
         if opt.save_model_para and not os.path.exists(expr_dir):
-            os.mkdir(expr_dir)
-            os.mkdir(expr_dir+'./sup/')
+            os.makedirs(expr_dir)
+            os.makedirs(expr_dir+'./sup/')
 
         else:
-            expr_dir = '../../temp1/'
-            if not os.path.exists(expr_dir+'./sup/'):
-                os.mkdir(expr_dir+'./sup/')
+            expr_dir = '/media/xwj/xwjdata/Programm/Counting-ICCV-DSSINet/temp1'
+            if not os.path.exists(expr_dir+'/sup/'):
+                os.makedirs(expr_dir+'/sup/')
 
         opt.expr_dir = expr_dir
 

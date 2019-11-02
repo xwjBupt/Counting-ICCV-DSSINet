@@ -5,9 +5,9 @@ import torch.nn.functional as F
 import logging
 from torch.nn import DataParallel
 from torch.autograd import Variable
-from network import Conv2d, FC, Conv2d_dilated, np_to_variable
+from src.network import Conv2d, FC, Conv2d_dilated, np_to_variable
 
-import network
+import src.network as network
 import numpy as np
 
 import importlib

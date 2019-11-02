@@ -14,10 +14,10 @@ datasets = {
         "density_method": "adaptive",
         "density_method_config": {'downsize':32},
 
-        "train_image_path": SHANG_PATH + '/part_A_final/train_data/images',
-        "train_label_path": SHANG_PATH + '/part_A_final/train_data/ground_truth',
-        "test_image_path": SHANG_PATH + '/part_A_final/test_data/images',
-        "test_label_path": SHANG_PATH + '/part_A_final/test_data/ground_truth',
+        "train_image_path": '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/images',
+        "train_label_path": '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/ground-truth',
+        "test_image_path": '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/test_data/images',
+        "test_label_path": '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/ground-truth',
         "train_val_split": (lambda x:x, lambda x:x[:29]),
         "annReadFunc": lambda x: x['image_info'][0][0][0][0][0],
         "mean_std": [96.3414, 66.8793],
@@ -54,15 +54,21 @@ datasets = {
 }
 
 def CreateDataLoader(opt, phase=None):
-    from RawLoader import ImageDataLoader, basic_config
-    from sampler import basic_config as sampler_config
-    from sampler import mode_func as sampler_func
-    import utils
+    from src.RawLoader import ImageDataLoader, basic_config
+    from src.sampler import basic_config as sampler_config
+    from src.sampler import mode_func as sampler_func
+    import src.utils
     import numpy as np
+
     train_image_path = datasets[opt.dataset]["train_image_path"]
     train_label_path = datasets[opt.dataset]["train_label_path"]
     test_image_path = datasets[opt.dataset]["test_image_path"]
     test_label_path = datasets[opt.dataset]["test_label_path"]
+
+    # train_image_path = '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/images'
+    # train_label_path = '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/ground-truth'
+    # test_image_path = '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/test_data/images'
+    # test_label_path = '/media/xwj/xwjdata/Dataset/ShanghaiTech/original/part_A/train_data/ground-truth'
 
     density_method = datasets[opt.dataset]["density_method"]
 

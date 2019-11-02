@@ -4,8 +4,9 @@ import os
 import random
 import sys
 import itertools
-from density_gen import Gauss2D, read_image_label_fix, read_image_label_apdaptive, \
+from src.density_gen import Gauss2D, read_image_label_fix, read_image_label_apdaptive, \
 read_image_label_3d, read_image, save_density_map, get_annoted_kneighbors
+from functools import cmp_to_key
 
 import copy
 import re
@@ -52,6 +53,10 @@ class ImageDataLoader():
         self.image_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
         self.label_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
 
+        # sort(self.image_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+        # sort(self.label_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+
+
         for img, lab in zip(self.image_files, self.label_files):
             assert '_'.join(re.findall(r'\d+', img)) == '_'.join(re.findall(r'\d+',lab))
 
@@ -81,7 +86,7 @@ class ImageDataLoader():
         
 
     def preload_data(self):
-        print 'Pre-loading the data. This may take a while...'
+        print ('Pre-loading the data. This may take a while...')
 
         t = Timer()
         t.tic()
@@ -90,9 +95,9 @@ class ImageDataLoader():
         for i in range(self.num_samples):
             self.blob_list[i] = (self.load_index(i))
             if i % 50 == 0:
-                print "loaded {}/{} samples".format(i, self.num_samples)
+                print ("loaded {}/{} samples".format(i, self.num_samples))
         duration = t.toc(average=False)
-        print 'Completed loading ' ,len(self.blob_list), ' files, time: ', duration
+        print ('Completed loading ' ,len(self.blob_list), ' files, time: ', duration)
         self.is_preload = True
 
     def precompute_scale(self):

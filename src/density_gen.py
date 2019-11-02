@@ -230,7 +230,7 @@ def read_image_label_fix(image_file, label_file, image_path, label_path, \
         nht = int(ht * 1.0/ min(wd, ht) * 320)
         resize = True
         img = img.resize((nwd, nht), resample=Image.BICUBIC)
-        print "{} X {} -> {} X {}".format(ht, wd, nht, nwd)
+        print ("{} X {} -> {} X {}".format(ht, wd, nht, nwd))
         wd = nwd
         ht = nht
 

@@ -19,7 +19,7 @@ from src import density_gen
 from src.datasets import datasets, CreateDataLoader
 
 from src.train_options import TrainOptions
-
+from tensorboardX import SummaryWriter
 import torch.nn as nn
 
 import src.ssim as ssim
@@ -54,8 +54,7 @@ if __name__ == '__main__':
     
     train_opt = TrainOptions()
     opt = train_opt.parse()
-        
-    vis_exp = train_opt.vis_exp
+    writer = SummaryWriter(log_dir=opt.expr_dir)
     data_loader_train = CreateDataLoader(opt, phase='train')
 
     loss_scale = opt.loss_scale
@@ -105,7 +104,7 @@ if __name__ == '__main__':
         iter_time = 0.0
         for i, datas in enumerate(\
                     DataLoader(data_loader_train, batch_size=opt.batch_size, \
-                                                    shuffle=True, num_workers=4,drop_last=True)):
+                                                    shuffle=True, num_workers=0,drop_last=True)):
             step_cnt += 1
             if i != 0:
                 load_time += load_timer.toc(average=False)
@@ -154,7 +153,7 @@ if __name__ == '__main__':
                 log_print(log_text, opt)
                 re_cnt = True
                 if opt.use_tensorboard:
-                    vis_exp.add_scalar_value('train_raw_loss', loss_value, step=step_cnt)
+                    writer.add_scalar('train_raw_loss', loss_value, step_cnt)
 
 
             ''' Save training image patch, and corresponding gt density map patch, 
@@ -176,8 +175,8 @@ if __name__ == '__main__':
 
         duration = outer_timer.toc(average=False)
         logging.info("epoch {}: {} seconds; Path: {}".format(epoch, duration, opt.expr_dir))
-        logging.info("load/iter/cuda: {} vs {} vs {} seconds; iter: {}".format(load_time, iter_time, net.cudaTimer.tot_time, net.cudaTimer.calls))
-        net.cudaTimer.tot_time = 0
+        # logging.info("load/iter/cuda: {} vs {} vs {} seconds; iter: {}".format(load_time, iter_time, net.cudaTimer.tot_time, net.cudaTimer.calls))
+        # net.cudaTimer.tot_time = 0
 
 
         save_name = os.path.join(opt.expr_dir, '%06d.h5' % epoch)
@@ -191,7 +190,7 @@ if __name__ == '__main__':
 
         if opt.use_tensorboard:
             try:
-                vis_exp.add_scalar_value('train_loss', train_loss/data_loader_train.get_num_samples(), step=epoch)
+                writer.add_scalar('train_loss', train_loss/data_loader_train.get_num_samples(), epoch)
             except:
                 pass
 

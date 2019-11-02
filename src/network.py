@@ -5,7 +5,7 @@ from torch.autograd import Variable, Function
 from torch.nn.modules.conv import _ConvNd
 from torch.nn.modules.utils import _pair
 from torch.nn import functional as F
-from utils import compute_same_padding2d
+from src.utils import compute_same_padding2d
 import logging
 from math import exp
 import numpy as np
@@ -91,7 +91,7 @@ class _Conv2d_dilated(_ConvNd):
         dilation = _pair(dilation)
         super(_Conv2d_dilated, self).__init__(
             in_channels, out_channels, kernel_size, stride, _pair(0), dilation,
-            False, _pair(0), groups, bias)
+            False, _pair(0), groups, bias,padding_mode='zeros')#xwj add padding_mode='zeros'
 
     def forward(self, input, dilation=None):
         input_shape = list(input.size())

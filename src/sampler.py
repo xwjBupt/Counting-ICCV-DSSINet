@@ -5,13 +5,13 @@ import os
 import random
 import sys
 import itertools
-from timer import Timer
-from density_gen import load_annPoints
+from src.timer import Timer
+from src.density_gen import load_annPoints
 import copy
 from torch.utils.data import DataLoader
 import torch
 import concurrent.futures
-import network
+import src.network as network
 import torchvision.transforms as transforms
 import re
 from PIL import Image as Image
@@ -103,7 +103,7 @@ class FixedSampler():
                 p += [(c[0], c[1])]
             return p#random.choice(p)
         self.patches = [slicer(i) for i in range(self.num_samples)]
-        print "recroping"
+        print ("recroping")
 
     def query_fname(self, i):
         return self.dataloader.query_fname(self.patch_list[i][0])
@@ -219,7 +219,7 @@ class PriorFixedSampler():
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for gt_count in executor.map(lambda p: len(load_annPoints(*p)), args):
                 gt_counts += [gt_count]
-        print "load done"
+        print ("load done")
         rate = [0,0]
         for i, (A_path, B_path) in enumerate(zip(self.image_files, self.label_files)):
             img_id, patch_id = re.findall(r'\d+', B_path)
@@ -241,7 +241,7 @@ class PriorFixedSampler():
                                                    len(self.sample_dict[i][1]) > 0])
             pro /= pro.sum()
             self.pro_dict[i] = pro
-        print 'class rate: ', rate
+        print ('class rate: ', rate)
  
     def shuffle_list(self):
         if not self.fixed_crop:
@@ -269,7 +269,7 @@ class PriorFixedSampler():
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             for blob in executor.map(lambda i: (i,self.dataloader[i]), indexs):
                 self.loaded[blob[0]] = blob[1]
-        print "re-prior crop: %f s" % load_timer.toc(average=False)
+        print ("re-prior crop: %f s" % load_timer.toc(average=False))
 
     def __iter__(self):
         if self.shuffle:
