@@ -132,16 +132,18 @@ class CrowdCounter(nn.Module):
             img_data = img_data.to(self.device)
 
         if self.training:
+            pdb.set_trace()
             density_map = self.model(img_data, **kargs)
+            if self.per:
+                self.perout = self.perception(density_map, gt_data)
+                self.perloss = self.perception.loss
         else:
             with torch.no_grad():
                 density_map = self.model(img_data, **kargs)
 
         if self.training:
             self.loss_ = self.loss_fn_(density_map, gt_data)
-            if self.per:
-                self.perout = self.perception(density_map, gt_data)
-                self.perloss = self.perception.loss
+            
             if len(self.opt.gpus) > 1:
                 self.loss_ = self.loss_.mean()
 
@@ -157,6 +159,7 @@ class CrowdCounter(nn.Module):
         else:
             self.LOSS = self.loss_ * scale
         self.LOSS.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), max_norm=20, norm_type=2)
         self.optimizer.step()
         self.optimizer.zero_grad()
 
