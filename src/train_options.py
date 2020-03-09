@@ -50,7 +50,7 @@ class TrainOptions():
 
         parser.add_argument('--crop_type', type=str, default="Fixed")
         parser.add_argument('--crop_scale', type=int, default=4)
-        parser.add_argument('--crop_size', type=tuple, default=(448,448))
+        parser.add_argument('--crop_size', type=tuple, default=(224,224))
         parser.add_argument('--patches_per_sample', type=int, default=5)
 
         parser.add_argument('--loss', type=str, default="NORMMSSSIM")
