@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from utils import compute_same_padding2d
+from src.utils import compute_same_padding2d
 import collections
-from network import load_net, _Conv2d_dilated, SequentialEndpoints
+from src.network import load_net, _Conv2d_dilated, SequentialEndpoints
 import math
 
 

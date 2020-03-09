@@ -21,9 +21,9 @@ class TrainOptions():
         self.initialized = False
 
     def initialize(self, parser):
-        parser.add_argument('--gpus', type=str, help='gpu_id', default='0')
+        parser.add_argument('--gpus', type=str, help='gpu_id', default='1')
         parser.add_argument('--dataset', type=str, default='shanghaiA', help='dataset')
-        parser.add_argument('--method', type=str, default='shanghaiA', help='dataset')
+        parser.add_argument('--method', type=str, default='Raw_DSSINet_p64-p256', help='dataset')
         parser.add_argument('--per', type=bool, default=True, help='if use perception')
 
         parser.add_argument('--epochs', type=int, default=300)
@@ -44,13 +44,13 @@ class TrainOptions():
         parser.add_argument('--disp_interval', type=int, default=50)
         parser.add_argument('--save_interval', type=int, default=500)
 
-        parser.add_argument('--batch_size', type=int, default=12)
+        parser.add_argument('--batch_size', type=int, default=1)
 
         parser.add_argument('--pretrain', type=str)
 
         parser.add_argument('--crop_type', type=str, default="Fixed")
         parser.add_argument('--crop_scale', type=int, default=4)
-        parser.add_argument('--crop_size', type=str, default='224x224')
+        parser.add_argument('--crop_size', type=tuple, default=(448,448))
         parser.add_argument('--patches_per_sample', type=int, default=5)
 
         parser.add_argument('--loss', type=str, default="NORMMSSSIM")
@@ -101,13 +101,13 @@ class TrainOptions():
         exp = '{}/{}-{}-{}'.format(dataset_name, opt.method, model, datetime.now().strftime('exp-%m-%d_%H-%M'))
         expr_dir = 'saved_models/{}/'.format(exp)  # model files are saved here
 
-        opt.crop_size = map(int, opt.crop_size.split('x'))
+        #opt.crop_size = map(int, opt.crop_size.split('x'))
 
         if opt.save_model_para and not os.path.exists(expr_dir):
             os.makedirs(expr_dir)
             os.makedirs(expr_dir + './sup/')
         else:
-            expr_dir = '/media/xwj/xwjdata/Programm/Counting-ICCV-DSSINet/temp1'
+            expr_dir = '/home/xwj/Counting-ICCV-DSSINet/temp1'
             if not os.path.exists(expr_dir + '/sup/'):
                 os.makedirs(expr_dir + '/sup/')
 

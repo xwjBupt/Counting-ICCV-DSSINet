@@ -16,7 +16,7 @@ import torchvision.transforms as transforms
 import re
 from PIL import Image as Image
 from PIL import ImageOps as ImageOps
-
+import pdb
 try:
     from timer import Timer
 except ImportError:
@@ -103,7 +103,7 @@ class FixedSampler():
                 p += [(c[0], c[1])]
             return p#random.choice(p)
         self.patches = [slicer(i) for i in range(self.num_samples)]
-        print ("recroping")
+        print ("patch_generate recroping")
 
     def query_fname(self, i):
         return self.dataloader.query_fname(self.patch_list[i][0])
@@ -146,7 +146,6 @@ class FixedSampler():
                            transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])
                            ]
         transform_img = transforms.Compose(transform_img)
-
         transform_den.append(transforms.Lambda(lambda img: d_crop(img, self.patches[bid][pid], self.crop_size)))
         transform_den.append(transforms.Lambda(lambda img: d_flip(img, self.filps[i])))
         transform_den += [transforms.Lambda(lambda den: network.np_to_variable(den, is_cuda=False, is_training=self.training))]

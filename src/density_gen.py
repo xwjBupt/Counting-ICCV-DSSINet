@@ -7,7 +7,7 @@ import collections
 from itertools import repeat
 import scipy.io as scio
 from PIL import Image
-
+import pdb
 
 def save_density_map(density_map, output_dir, fname='results.png'):
 
@@ -273,8 +273,8 @@ def read_image_label_apdaptive(image_file, label_file, image_path, label_path, \
         ht = nht
         
 
-    nht = (ht / downsize) * downsize
-    nwd = (wd / downsize) * downsize
+    nht = (ht // downsize) * downsize
+    nwd = (wd // downsize) * downsize
     if nht != ht or nwd != wd:
         img = img.resize((nwd, nht), resample=Image.BICUBIC)
         resize = True
@@ -297,8 +297,8 @@ def read_image_label_3d(image_file, label_file, image_path, label_path, get_gaus
     den, gt_count = get_density_map_3d(ht, wd, annPoints, K, S, get_gauss)
     denstiy_channels = len(S)
 
-    ht_1 = (ht / downsize) * downsize
-    wd_1 = (wd / downsize) * downsize
+    ht_1 = (ht // downsize) * downsize
+    wd_1 = (wd // downsize) * downsize
     img = cv2.resize(img, (wd_1, ht_1))
     img = img.reshape((1, 1, img.shape[0], img.shape[1]))
     if channels != 1:

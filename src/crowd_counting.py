@@ -9,7 +9,7 @@ from src.network import Conv2d, FC, Conv2d_dilated, np_to_variable
 from torchvision import models
 import src.network as network
 import numpy as np
-
+import pdb
 import importlib
 
 
@@ -51,10 +51,12 @@ class Perception(nn.Module):
         LOSS256 = None
         if self.p64:
             n, c, h, w = x64.shape
-            LOSS64 = self.loss64(x64, gt64) * h * w / (h + w) * self.weight[0]
+            LOSS64 = self.loss64(x64, gt64)
+            LOSS64 = LOSS64* h * w / (h + w) * self.weight[0]
         if self.p256:
             n, c, h, w = x256.shape
-            LOSS256 = self.loss64(x256, gt256) * h * w / (h + w) * self.weight[1]
+            LOSS256 = self.loss256(x256, gt256)
+            LOSS256 = LOSS256* h * w / (h + w) * self.weight[1]
         return LOSS64, LOSS256
 
     @property
@@ -67,14 +69,14 @@ class CrowdCounter(nn.Module):
     def __init__(self, optimizer, opt):
         super(CrowdCounter, self).__init__()
         self.opt = opt
-        self.device = opt.gpus[0]
+        self.device = 'cuda'
         self.model = self.find_model_using_name(opt.model_name)()
         self.loss_fn_ = self.find_loss_using_name(opt.loss or 'MSE')()
         self.init_model(opt.pretrain)
         self.per = opt.per
 
         if self.per:
-            self.perception = Perception(weight=[1, 1])
+            self.perception = Perception(weight=[1, 1]).cuda()
             self.perloss = None
 
         if optimizer is not None:
@@ -111,10 +113,10 @@ class CrowdCounter(nn.Module):
         if len(self.opt.gpus) > 0:
             assert (torch.cuda.is_available())
             self.model.to(self.device)
-            self.model = torch.nn.DataParallel(self.model, self.opt.gpus)  # multi-GPUs
+            #self.model = torch.nn.DataParallel(self.model, self.opt.gpus)  # multi-GPUs
             if self.opt.loss is not None and 'SSIM' in self.opt.loss:
                 self.loss_fn_.to(self.device)
-                self.loss_fn = torch.nn.DataParallel(self.loss_fn_, self.opt.gpus)  # multi-GPUs
+                #self.loss_fn = torch.nn.DataParallel(self.loss_fn_, self.opt.gpus)  # multi-GPUs
             else:
                 self.loss_fn = self.loss_fn_
 
@@ -136,11 +138,10 @@ class CrowdCounter(nn.Module):
                 density_map = self.model(img_data, **kargs)
 
         if self.training:
-
-            self.loss_ = self.loss_fn(density_map, gt_data)
+            self.loss_ = self.loss_fn_(density_map, gt_data)
             if self.per:
-                self.perloss = self.perception(density_map, gt_data)
-
+                self.perout = self.perception(density_map, gt_data)
+                self.perloss = self.perception.loss
             if len(self.opt.gpus) > 1:
                 self.loss_ = self.loss_.mean()
 
@@ -150,11 +151,12 @@ class CrowdCounter(nn.Module):
             return density_map
 
     def backward(self, scale=1.0):
-        if self.perloss is not None:
-            self.loss = self.loss_ + self.perloss[0] + self.perloss[1]
+        if self.per:
+            self.LOSS = self.loss_ + self.perloss[0] + self.perloss[1]
+            self.LOSS = self.LOSS*scale
         else:
-            self.loss = self.loss_ * scale
-        self.loss.backward()
+            self.LOSS = self.loss_ * scale
+        self.LOSS.backward()
         self.optimizer.step()
         self.optimizer.zero_grad()
 

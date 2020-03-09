@@ -7,7 +7,7 @@ import itertools
 from src.density_gen import Gauss2D, read_image_label_fix, read_image_label_apdaptive, \
 read_image_label_3d, read_image, save_density_map, get_annoted_kneighbors
 from functools import cmp_to_key
-
+import pdb
 import copy
 import re
 
@@ -49,12 +49,12 @@ class ImageDataLoader():
         self.label_files = [filename for filename in os.listdir(label_path) \
                            if os.path.isfile(os.path.join(label_path,filename))]
 
-
-        # self.image_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
-        # self.label_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
-
-        sort(self.image_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
-        sort(self.label_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+        self.image_files.sort()
+        self.label_files.sort()
+#         self.image_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
+#         self.label_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
+#         sort(self.image_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+#         sort(self.label_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
 
 
         for img, lab in zip(self.image_files, self.label_files):

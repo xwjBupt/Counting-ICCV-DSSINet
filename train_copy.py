@@ -161,8 +161,8 @@ if __name__ == '__main__':
                         ["%.1f" % gt_count.max(), "%.1f" % gt_count.mean(), "%.1f" % gt_count.min()]) + \
                                ' et_cnt: %s,' % "{}".format(
                         ["%.1f" % et_count.max(), "%.1f" % et_count.mean(), "%.1f" % et_count.min()]) + \
-                               ' loss: .4f rawloss:%.3f  p64:%.3f  p256:%.3f' % (
-                               float(loss_value), p64.item(), p256.item())
+                               ' loss: %.4f rawloss:%.3f  p64:%.3f  p256:%.3f' % (
+                               float(loss_value), rawloss.item(),p64.item(), p256.item())
 
                 log_print(log_text, opt)
                 re_cnt = True
