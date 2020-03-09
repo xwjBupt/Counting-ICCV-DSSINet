@@ -8,28 +8,30 @@ import random
 import glob
 import logging
 import sys
+from tensorboardX import SummaryWriter
 
 try:
     from pycrayon import CrayonClient
 except ImportError:
     CrayonClient = None
 
+
 class TrainOptions():
     def __init__(self):
         self.initialized = False
 
     def initialize(self, parser):
-        parser.add_argument('--gpus', type=str, help='gpu_id',default='0')
+        parser.add_argument('--gpus', type=str, help='gpu_id', default='0')
         parser.add_argument('--dataset', type=str, default='shanghaiA', help='dataset')
-
+        parser.add_argument('--method', type=str, default='shanghaiA', help='dataset')
+        parser.add_argument('--per', type=bool, default=True, help='if use perception')
 
         parser.add_argument('--epochs', type=int, default=300)
         parser.add_argument('--lr', type=float, default=0.00001)
 
-        parser.add_argument('--visual', dest='use_tensorboard', action='store_true',default=True)
+        parser.add_argument('--visual', dest='use_tensorboard', action='store_true', default=True)
         # parser.add_argument('--no-visual', dest='use_tensorboard', action='store_false')
         # parser.set_defaults(use_tensorboard=True)
-
 
         parser.add_argument('--save', dest='save_model_para', action='store_true')
         parser.add_argument('--no-save', dest='save_model_para', action='store_false')
@@ -44,19 +46,16 @@ class TrainOptions():
 
         parser.add_argument('--batch_size', type=int, default=12)
 
-
         parser.add_argument('--pretrain', type=str)
-
 
         parser.add_argument('--crop_type', type=str, default="Fixed")
         parser.add_argument('--crop_scale', type=int, default=4)
         parser.add_argument('--crop_size', type=str, default='224x224')
         parser.add_argument('--patches_per_sample', type=int, default=5)
 
-
         parser.add_argument('--loss', type=str, default="NORMMSSSIM")
         parser.add_argument('--loss_scale', type=float, default=1.0)
-        parser.add_argument('--model_name', type=str,default='CRFVGG_prune')
+        parser.add_argument('--model_name', type=str, default='CRFVGG')
 
         self.initialized = True
         return parser
@@ -98,20 +97,19 @@ class TrainOptions():
         # opt.isTrain = self.isTrain   # train or test
 
         model = opt.model_name
-        dataset_name = opt.dataset #dataset name - used for saving model file
-        exp = 'v7-{}-{}-{}'.format(dataset_name, model, datetime.now().strftime('exp-%m-%d_%H-%M'))
-        expr_dir = 'saved_models/{}/'.format(exp) #model files are saved here
+        dataset_name = opt.dataset  # dataset name - used for saving model file
+        exp = '{}/{}-{}-{}'.format(dataset_name, opt.method, model, datetime.now().strftime('exp-%m-%d_%H-%M'))
+        expr_dir = 'saved_models/{}/'.format(exp)  # model files are saved here
 
         opt.crop_size = map(int, opt.crop_size.split('x'))
 
         if opt.save_model_para and not os.path.exists(expr_dir):
             os.makedirs(expr_dir)
-            os.makedirs(expr_dir+'./sup/')
-
+            os.makedirs(expr_dir + './sup/')
         else:
             expr_dir = '/media/xwj/xwjdata/Programm/Counting-ICCV-DSSINet/temp1'
-            if not os.path.exists(expr_dir+'/sup/'):
-                os.makedirs(expr_dir+'/sup/')
+            if not os.path.exists(expr_dir + '/sup/'):
+                os.makedirs(expr_dir + '/sup/')
 
         opt.expr_dir = expr_dir
 
@@ -119,37 +117,34 @@ class TrainOptions():
         fh = logging.FileHandler("{0}/{1}.log".format(expr_dir, 'log'), mode='w')
         fh.setFormatter(logging.Formatter(fmt="%(asctime)s  %(message)s", datefmt="%d-%H:%M"))
         logger.addHandler(fh)
-        opt.logger =  logger
+        opt.logger = logger
 
         self.opt = opt
 
-        #Tensorboard  config
-        use_tensorboard = opt.use_tensorboard
-        remove_all_log = False   # remove all historical experiments in TensorBoardO
-        use_tensorboard = use_tensorboard and CrayonClient is not None
+        # Tensorboard  config
+        use_tensorboard = True
+        remove_all_log = False  # remove all historical experiments in TensorBoardO
+        # use_tensorboard = use_tensorboard and CrayonClient is not None
         self.vis_exp = None
 
         if use_tensorboard:
-            cc = CrayonClient(hostname='8.8.8.8', port=7879)
-            if remove_all_log:
-                cc.remove_all_experiments()
+            # cc = CrayonClient(hostname='8.8.8.8', port=7879)
+            # if remove_all_log:
+            #     cc.remove_all_experiments()
             random.seed(time.time())
-            vis_exp_name = exp + str(random.random())
+            vis_exp_name = exp
             opt.vis_exp_name = vis_exp_name
-            self.vis_exp = cc.create_experiment(vis_exp_name)
+            self.vis_exp = SummaryWriter(comment=opt.vis_exp_name)
 
-        import socket
-        hostname = socket.gethostname()
-
-        # set gpu ids
-        str_ids = opt.gpus.split(',')
-        opt.gpus = []
-        for str_id in str_ids:
-            id = int(str_id)
-            if id >= 0:
-                opt.gpus.append(id)
-        if len(opt.gpus) > 0:
-            torch.cuda.set_device(opt.gpus[0])
+        # # set gpu ids
+        # str_ids = opt.gpus.split(',')
+        # opt.gpus = []
+        # for str_id in str_ids:
+        #     id = int(str_id)
+        #     if id >= 0:
+        #         opt.gpus.append(id)
+        # if len(opt.gpus) > 0:
+        #     torch.cuda.set_device(opt.gpus[0])
 
         self.opt = opt
         self.print_options(opt)

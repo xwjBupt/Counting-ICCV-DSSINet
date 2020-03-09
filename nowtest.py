@@ -57,10 +57,10 @@ def test_model_origin(net, data_loader, save_output=False, save_path=None, test_
     mse = 0.0
     detail = ''
     if save_output:
-        print save_path
+        print (save_path)
     for i, blob in enumerate(data_loader.get_loader(test_batch_size)):
         if (i * len(gpus) + 1) % 100 == 0:
-            print "testing %d" % (i + 1)
+            print ("testing %d" % (i + 1))
         if save_output:
             index, fname, data, mask, gt_dens, gt_count = blob
         else:
@@ -89,7 +89,7 @@ def test_model_origin(net, data_loader, save_output=False, save_path=None, test_
     mae = mae/len(data_loader)
     mse = np.sqrt(mse/len(data_loader))
     duration = timer.toc(average=False)
-    print "testing time: %d" % duration
+    print ("testing time: %d" % duration)
     return mae,mse,detail
 
 
@@ -102,11 +102,11 @@ def test_model_patches(net, data_loader, save_output=False, save_path=None, test
     mse = 0.0
     detail = ''
     if save_output:
-        print save_path
+        print (save_path)
     for i, blob in enumerate(data_loader.get_loader(1)):
 
         if (i + 1) % 10 == 0:
-            print "testing %d" % (i + 1)
+            print ("testing %d" % (i + 1))
         if save_output:
             index, fname, data, mask, gt_dens, gt_count = blob
         else:
@@ -176,7 +176,7 @@ def test_model_patches(net, data_loader, save_output=False, save_path=None, test
     mae = mae/len(data_loader)
     mse = np.sqrt(mse/len(data_loader))
     duration = timer.toc(average=False)
-    print "testing time: %d" % duration
+    print ("testing time: %d" % duration)
     return mae,mse,detail
 
 
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     if args.split is not None:
         model_files = ['%06d.h5' % epoch for epoch in map(int, args.split[:-1].split(','))]
         
-    print model_files
+    print (model_files)
     for model_file in model_files:
 
         epoch = model_file.split('.')[0] if not test_once else '0'
@@ -273,7 +273,7 @@ if __name__ == '__main__':
         
         log_text = 'TEST EPOCH: %s, MAE: %.2f, MSE: %0.2f' % (epoch, test_mae, test_mse)
 
-        print log_text
+        print (log_text)
 
         with open(file_results, 'w') as f: 
             f.write(detail + 'MAE: %0.2f, MSE: %0.2f' % (test_mae, test_mse))

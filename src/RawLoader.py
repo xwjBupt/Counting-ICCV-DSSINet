@@ -50,11 +50,11 @@ class ImageDataLoader():
                            if os.path.isfile(os.path.join(label_path,filename))]
 
 
-        self.image_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
-        self.label_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
+        # self.image_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
+        # self.label_files.sort(cmp=lambda x, y: cmp('_'.join(re.findall(r'\d+',x)),'_'.join(re.findall(r'\d+',y))))
 
-        # sort(self.image_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
-        # sort(self.label_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+        sort(self.image_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
+        sort(self.label_files,key=cmp_to_key(lambda x, y: cmp('_'.join(re.findall(r'\d+', x)), '_'.join(re.findall(r'\d+', y)))))
 
 
         for img, lab in zip(self.image_files, self.label_files):

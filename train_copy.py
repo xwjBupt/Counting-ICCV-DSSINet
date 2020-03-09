@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     train_opt = TrainOptions()
     opt = train_opt.parse()
-    writer = SummaryWriter(log_dir=opt.expr_dir)
+    writer = SummaryWriter(comment=opt.vis_exp_name)
     data_loader_train = CreateDataLoader(opt, phase='train')
 
     loss_scale = opt.loss_scale
@@ -107,10 +107,12 @@ if __name__ == '__main__':
             if i != 0:
                 load_time += load_timer.toc(average=False)
             iter_timer.tic()
+
             img_data = datas[0]
             gt_data = datas[1]
             raw_patch = datas[2]
             gt_count = datas[3]
+
             fnames = [data_loader_train.query_fname(i) for i in datas[4]]
             batch_size = len(fnames)
 
@@ -119,8 +121,12 @@ if __name__ == '__main__':
             net.train()
             density_map = net(img_data, gt_data)
             net.backward(loss_scale)
+            if not opt.per:
+                loss_value = float(net.loss.item())
 
-            loss_value = float(net.loss.item())
+            else:
+                rawloss, p64, p256 = net.loss
+                loss_value = rawloss.item() + p64.item() + p256.item()
             train_loss += loss_value
 
             if step % disp_interval == 0 or \
@@ -142,12 +148,21 @@ if __name__ == '__main__':
                 duration = t.toc(average=False)
                 fps = disp_interval * batch_size / duration
                 # utils.save_results(img_data,gt_data,density_map, opt.expr_dir, fname=blob['fname'], epoch=epoch)
-                log_text = 'epoch: %04d,' % epoch + ' step %04d,' % step + ' Time: %.2fs,' % fps + \
-                           ' gt_cnt: %s,' % "{}".format(
-                    ["%.1f" % gt_count.max(), "%.1f" % gt_count.mean(), "%.1f" % gt_count.min()]) + \
-                           ' et_cnt: %s,' % "{}".format(
-                    ["%.1f" % et_count.max(), "%.1f" % et_count.mean(), "%.1f" % et_count.min()]) + \
-                           ' loss: %e' % float(loss_value)
+                if not opt.per:
+                    log_text = 'epoch: %04d,' % epoch + ' step %04d,' % step + ' Time: %.2fs,' % fps + \
+                               ' gt_cnt: %s,' % "{}".format(
+                        ["%.1f" % gt_count.max(), "%.1f" % gt_count.mean(), "%.1f" % gt_count.min()]) + \
+                               ' et_cnt: %s,' % "{}".format(
+                        ["%.1f" % et_count.max(), "%.1f" % et_count.mean(), "%.1f" % et_count.min()]) + \
+                               ' loss: %e' % float(loss_value)
+                else:
+                    log_text = 'epoch: %04d,' % epoch + ' step %04d,' % step + ' Time: %.2fs,' % fps + \
+                               ' gt_cnt: %s,' % "{}".format(
+                        ["%.1f" % gt_count.max(), "%.1f" % gt_count.mean(), "%.1f" % gt_count.min()]) + \
+                               ' et_cnt: %s,' % "{}".format(
+                        ["%.1f" % et_count.max(), "%.1f" % et_count.mean(), "%.1f" % et_count.min()]) + \
+                               ' loss: .4f rawloss:%.3f  p64:%.3f  p256:%.3f' % (
+                               float(loss_value), p64.item(), p256.item())
 
                 log_print(log_text, opt)
                 re_cnt = True
